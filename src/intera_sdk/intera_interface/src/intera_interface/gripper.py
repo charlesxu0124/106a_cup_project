@@ -22,10 +22,10 @@ class Gripper(object):
     """
     Interface class for a gripper on the Intera Research Robot.
     """
-    MAX_POSITION = 0.041667
-    MIN_POSITION = 0.0
+    MAX_POSITION = 0.06
+    MIN_POSITION = 0.014
     MAX_VELOCITY = 3.0
-    MIN_VELOCITY = 0.15
+    MIN_VELOCITY = 0.001
 
     def __init__(self, ee_name="right_gripper", calibrate=True):
         """

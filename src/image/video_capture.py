@@ -62,7 +62,10 @@ class VideoCapture:
 if __name__ == "__main__":
   import sys
   #resource = int(sys.argv[1])
-  resource = "/dev/video1"
+  resource = "/dev/video0"
   cap = VideoCapture(resource)
-  frame = cap.read()
+  while True:
+    frame = cap.read()
+    cv2.imshow('', frame)
+    cv2.waitKey(1)
   cv2.imwrite("frame.png", frame)

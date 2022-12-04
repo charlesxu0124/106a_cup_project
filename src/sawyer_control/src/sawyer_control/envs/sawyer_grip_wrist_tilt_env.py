@@ -148,7 +148,11 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
         )
 
     def _get_obs(self):
-        endeff = self._get_endeffector_pose()[:3]
+        endeff = np.zeros(6)
+        ee_pos = self._get_endeffector_pose()
+        endeff[:3] = ee_pos[:3]
+        yaw, pitch, roll = Quaternion(ee_pos[3:]).yaw_pitch_roll
+        endeff[3:] = np.array([yaw, pitch, roll])
         image = self.cap.read() # (480, 640, 3) # let renderer generate image
         obs_dict = dict(
             observation=endeff,

@@ -23,7 +23,7 @@ class Gripper(object):
     Interface class for a gripper on the Intera Research Robot.
     """
     MAX_POSITION = 0.06
-    MIN_POSITION = 0.014
+    MIN_POSITION = 0.0
     MAX_VELOCITY = 3.0
     MIN_VELOCITY = 0.001
 

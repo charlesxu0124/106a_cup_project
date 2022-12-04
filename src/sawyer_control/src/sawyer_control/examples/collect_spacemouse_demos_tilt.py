@@ -63,7 +63,7 @@ def collect_one_rollout_mdp(env, expert, horizon=200, render=False, pause=0,  th
             u[3] = -1 if grasp else 1
             u[4] = -a[5] # rotation
             # u[5] = -a[3] # tilt
-            #print(u)
+            print(u)
             o, r, done, info = env.step(u)
 
             traj["actions"].append(u)

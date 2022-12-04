@@ -1,5 +1,9 @@
-from image import segment_cup, get_target
+# from image import segment_cup, get_target
+import numpy as np
 
+K = np.array([[604.026546, 0.000000, 331.477939],
+[0.000000, 602.778325, 214.438981],
+[0.000000, 0.000000, 1.000000]])
 
 # select grasp point in pixels -> (538, 495)
 # In image:
@@ -20,14 +24,43 @@ def pixel_to_robot(pixels):
     '''
     Assigned to: Allie, Charles. Soft ddl 11/27
     Calibration info: 
-    Checkerboard H 23.5cm / 9 squares
-                W 18.3cm / 7 squares
-        rosrun camera_calibration cameracalibrator.py --size 9x7 --square 0.026 image:=/usb_cam/image_raw camera:=/usb_cam
+    Checkerboard H 23.5cm / 8 squares
+                W 18.3cm / 6 squares
+        rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.026 image:=/usb_cam/image_raw camera:=/usb_cam
     input: tuple of pixels
     returns: x, y, z coordinates of grasp point for FK planner
+
+    curr: 0.722921332930742 ,  0.12386950470971811
+    target: ([0.56342208,      0.04239593, 
+
+    pred: 0.6815324235101948 ,  -0.06193677822190522
+    actual: 0.53706831, -0.08917044
+
+    pred: 0.797421369887727 ,  0.09732575000520052
+    actual: 0.617203  , 0.02721379,
+
+    base_link og z: 0.90415704
+ 
+
     '''
-    camera_to_robot = # result of calibration, load from TF
-    x,y = camera_to_robot @ pixel_to_camera @ pixels 
+    pixels = np.append(pixels, [1])
+    # Extrinsics
+    robot_to_camera = np.zeros((4,4))
+    robot_to_camera_R = np.array([[-1,0,0],[0,1,0],[0,0,-1]])
+    robot_to_camera_p = np.array([ 0.63438559, -0.03667158,  0.79])
+    robot_to_camera[:3,:3] = robot_to_camera_R
+    robot_to_camera[:3,3] = robot_to_camera_p
+    robot_to_camera[3,3] = 1 
+
+    print("extrinsics",robot_to_camera)
+
+    camera_to_robot = np.linalg.inv(robot_to_camera)
+    pixel_to_camera = np.append(np.linalg.inv(K) @ pixels, [1])
+    # Intrinsics
+    x,y, _, _ = camera_to_robot @ pixel_to_camera
+    offset_x, offset_y = 0.17, 0.09
+    return x-offset_x,y-offset_y
+
 
 def planner():
     return None

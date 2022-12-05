@@ -1,5 +1,8 @@
 # from image import segment_cup, get_target
 import numpy as np
+from sawyer_control.src.sawyer_control.envs.sawyer_grip_wrist_tilt_env import SawyerGripWristEnv
+from sawyer_control.src.sawyer_control.examples.pickup import execute_pick_and_place
+from sawyer_control.src.sawyer_control.helper.video_capture import VideoCapture
 
 K = np.array([[604.026546, 0.000000, 331.477939],
 [0.000000, 602.778325, 214.438981],
@@ -62,14 +65,36 @@ def pixel_to_robot(pixels):
     return x-offset_x,y-offset_y
 
 
-def planner():
-    return None
-# planner goes to the coords
+def get_target(img=None):
+    '''
+    Returns: coordinate of any open slot in spatial frame
+    '''
+
+    pos = dict(1=np.array([ 0.66586983, -0.20091158,]),
+            2 = np.array([ 0.56408536, -0.19261755]),
+            3=np. array([ 0.47533491, -0.18826577,]),
+            5=np.array([ 0.55825764, -0.0977271 ,]),
+            4=np. array([ 0.67055243, -0.10787934,]),
+            6=np.array([ 0.47370866, -0.09306668,]), 
+            7=np.array([ 0.6702069 , -0.02252326,]),
+            8=np.array([ 0.56647497, -0.00757453,]),
+            9 = np.array([ 0.47168967, -0.00487166]))
 
 
 if __name__ == 'main':
+    env = SawyerGripWristEnv(
+    action_mode='position',
+    config_name='charles_config',
+    reset_free=False,
+    position_action_scale=0.01,
+    max_speed=0.4,
+    step_sleep_time=0.2,
+    )
     # take pic
+    resource = "/dev/video0"
+    cap = VideoCapture(resource)
+    image = cap.read()
     pixel_coords = segment_cup(img=None)
     grasp_point = pixel_to_robot(pixel_coords)
     place_point = get_target(img=None)
-    planner() # Assigned to: Charles
+    execute_pick_and_place(env, bottle_pos=grasp_point, slot_pos=place_point)

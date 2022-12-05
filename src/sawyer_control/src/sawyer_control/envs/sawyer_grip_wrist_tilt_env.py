@@ -46,6 +46,7 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
         self.indicator_threshold=indicator_threshold
         self.reward_type = reward_type
         self._state_goal = np.array(fixed_goal)
+        self.reset_angles = self.config.RESET_ANGLES
         self.gripper_action = 1
         USE_GRIPPER = False
         if USE_GRIPPER:
@@ -124,21 +125,30 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
 
     def _reset_robot(self):
         if self.gripper is not None:
-            self.gripper.do_cmd()
+            self.gripper.do_open_cmd()
         if not self.reset_free:
             if self.action_mode == "position":
-                # for _ in range(5):
-                #     self._position_act(self.pos_control_reset_position - self._get_endeffector_pose()[:3], ) # orientation=self.pos_control_ee_orientation)
-                self.request_reset_angle_action()
+                current_angle, _, _, _, _ = self.request_observation()
+                angles = self.reset_angles
+                pos = self.pos_control_reset_position
+                target_ee_pos = np.concatenate((pos, self.config.QUATERNIONS_GOAL))
+                while np.linalg.norm(current_angle-angles) > 0.01:
+                    self.send_angle_action(angles, np.array(target_ee_pos))
+                    current_angle, _, ee_pos, _, _ = self.request_observation()
+
+                # self.request_reset_angle_action()
             else:
                 self.in_reset = True
                 self._safe_move_to_neutral()
                 self.in_reset = False
-        inp = input("reset, waiting")
-        while inp == "r":
-            print("reset again")
-            self.request_reset_angle_action()
-            inp = input("reset, waiting")
+
+            inp = input("reset done, press enter to continue: ")
+            while inp == "r":
+                print("reset again")
+                for _ in range(10):
+                    self.step(np.array([0, 0, 0.5, 0, 0, 0]))
+                self.request_reset_angle_action()
+                inp = input("reset the scene, enter when it is done")
 
     def _set_action_space(self):
         self.action_space = Box(

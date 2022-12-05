@@ -25,8 +25,8 @@ class Gripper(object):
     MAX_POSITION = 0.06
     MIN_POSITION = 0.0
     MAX_VELOCITY = 3.0
-    MIN_VELOCITY = 0.001
-
+    MIN_VELOCITY = 0.002
+    
     def __init__(self, ee_name="right_gripper", calibrate=True):
         """
         Constructor.

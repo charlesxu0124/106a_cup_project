@@ -3,7 +3,8 @@ import numpy as np
 from sawyer_control.src.sawyer_control.envs.sawyer_grip_wrist_tilt_env import SawyerGripWristEnv
 from sawyer_control.src.sawyer_control.examples.pickup import execute_pick_and_place
 from sawyer_control.src.sawyer_control.helper.video_capture import VideoCapture
-
+import cv2
+from cv.cv import find_empty_space, find_bottle_center
 K = np.array([[604.026546, 0.000000, 331.477939],
 [0.000000, 602.778325, 214.438981],
 [0.000000, 0.000000, 1.000000]])
@@ -65,23 +66,23 @@ def pixel_to_robot(pixels):
     return x-offset_x,y-offset_y
 
 
-def get_target(img=None):
+def get_target(idx):
     '''
     Returns: coordinate of any open slot in spatial frame
     '''
 
-    pos = dict(1=np.array([ 0.66586983, -0.20091158,]),
-            2 = np.array([ 0.56408536, -0.19261755]),
-            3=np. array([ 0.47533491, -0.18826577,]),
-            5=np.array([ 0.55825764, -0.0977271 ,]),
-            4=np. array([ 0.67055243, -0.10787934,]),
-            6=np.array([ 0.47370866, -0.09306668,]), 
-            7=np.array([ 0.6702069 , -0.02252326,]),
-            8=np.array([ 0.56647497, -0.00757453,]),
-            9 = np.array([ 0.47168967, -0.00487166]))
+    pos = [np.array([ 0.66586983, -0.20091158,]),
+    np.array([ 0.56408536, -0.19261755]),
+    np.array([ 0.47533491, -0.18826577,]),
+    np.array([ 0.67055243, -0.10787934,]),
+    np.array([ 0.55825764, -0.0977271 ,]),
+    np.array([ 0.47370866, -0.09306668,]), 
+    np.array([ 0.6702069 , -0.02252326,]),
+    np.array([ 0.56647497, -0.00757453,]),
+    np.array([ 0.47168967, -0.00487166])]
+    return pos[idx-1]
 
-
-if __name__ == 'main':
+if __name__ == '__main__':
     env = SawyerGripWristEnv(
     action_mode='position',
     config_name='charles_config',
@@ -93,8 +94,20 @@ if __name__ == 'main':
     # take pic
     resource = "/dev/video0"
     cap = VideoCapture(resource)
-    image = cap.read()
-    pixel_coords = segment_cup(img=None)
-    grasp_point = pixel_to_robot(pixel_coords)
-    place_point = get_target(img=None)
-    execute_pick_and_place(env, bottle_pos=grasp_point, slot_pos=place_point)
+    
+    while True:
+        input('place bottle and press enter: ')
+        image = cap.read()
+        pixel_coords = find_bottle_center(img=image)
+        cv2.imshow('', image)
+        # print(pixel_coords)
+        cv2.waitKey(1)
+        while pixel_coords==None:
+            image = cap.read()
+            pixel_coords = find_bottle_center(img=image)
+        grasp_point = pixel_to_robot(pixel_coords)
+        
+        place_idx = find_empty_space(img=image)
+        place_point = get_target(idx=place_idx)
+        # import pdb; pdb.set_trace()
+        execute_pick_and_place(env, bottle_pos=grasp_point, slot_pos=place_point)

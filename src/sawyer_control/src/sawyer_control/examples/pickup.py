@@ -47,14 +47,14 @@ def execute_pick_and_place(env, bottle_pos, slot_pos=None):
     o = move_to_point(env, waypoint, o, grasp=True)
 
     waypoint = copy.deepcopy(o['observation'][:3])
-    waypoint[2] = 0.16
+    waypoint[2] = 0.22
     o = move_to_point(env, waypoint, o, grasp=True)
 
     u = np.zeros((6, ))
     u[3] = 1
     o, _, _, _ = env.step(u)
 
-    input('waiting to reset')
+    # input('waiting to reset')
 
     waypoint = copy.deepcopy(o['observation'][:3])
     waypoint[2] = 0.25

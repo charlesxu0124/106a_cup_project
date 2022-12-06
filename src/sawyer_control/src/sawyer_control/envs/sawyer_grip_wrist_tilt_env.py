@@ -55,8 +55,6 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
         else:
             print("NOT initializing gripper")
             self.gripper = None
-        resource = "/dev/video0"
-        self.cap = VideoCapture(resource)
         self.observation_space = Dict([
             ('observation', self.observation_space),
             ('desired_goal', self.goal_space),
@@ -142,13 +140,13 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
                 self._safe_move_to_neutral()
                 self.in_reset = False
 
-            inp = input("reset done, press enter to continue: ")
-            while inp == "r":
-                print("reset again")
-                for _ in range(10):
-                    self.step(np.array([0, 0, 0.5, 0, 0, 0]))
-                self.request_reset_angle_action()
-                inp = input("reset the scene, enter when it is done")
+            # # inp = input("reset done, press enter to continue: ")
+            # while inp == "r":
+            #     print("reset again")
+            #     for _ in range(10):
+            #         self.step(np.array([0, 0, 0.5, 0, 0, 0]))
+            #     self.request_reset_angle_action()
+            #     inp = input("reset the scene, enter when it is done")
 
     def _set_action_space(self):
         self.action_space = Box(
@@ -163,7 +161,7 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
         endeff[:3] = ee_pos[:3]
         yaw, pitch, roll = Quaternion(ee_pos[3:]).yaw_pitch_roll
         endeff[3:] = np.array([yaw, pitch, roll])
-        image = self.cap.read() # (480, 640, 3) # let renderer generate image
+        # image = self.cap.read() # (480, 640, 3) # let renderer generate image
         obs_dict = dict(
             observation=endeff,
             desired_goal=endeff,
@@ -171,8 +169,8 @@ class SawyerGripWristEnv(SawyerEnvBase, ):
             state_observation=endeff,
             state_desired_goal=endeff,
             state_achieved_goal=endeff,
-            image_observation=image, # [::10, 90:570:10, :].flatten(),
-            hires_image_observation=image, # [::10, 90:570:10, :].flatten(),
+            # image_observation=image, # [::10, 90:570:10, :].flatten(),
+            # hires_image_observation=image, # [::10, 90:570:10, :].flatten(),
         )
         return obs_dict
 
